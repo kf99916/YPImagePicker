@@ -6,12 +6,12 @@
 //  Copyright © 2016 Yummypets. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import Stevia
 import Photos
 
-protocol ImagePickerDelegate: AnyObject {
-    func noPhotos()
+protocol YPPickerVCDelegate: AnyObject {
+    func libraryHasNoItems()
     func shouldAddToSelection(indexPath: IndexPath, numSelections: Int) -> Bool
     func shouldFilter(photo: YPMediaPhoto, filter: YPFilter?) -> Bool
 }
@@ -21,7 +21,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     let albumsManager = YPAlbumsManager()
     var shouldHideStatusBar = false
     var initialStatusBarHidden = false
-    weak var imagePickerDelegate: ImagePickerDelegate?
+    weak var pickerVCDelegate: YPPickerVCDelegate?
     
     override open var prefersStatusBarHidden: Bool {
         return (shouldHideStatusBar || initialStatusBarHidden) && YPConfig.hidesStatusBar
@@ -68,7 +68,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             cameraVC = YPCameraVC()
             cameraVC?.didCapturePhoto = { [weak self] img in
                 self?.didSelectItems?([YPMediaItem.photo(p: YPMediaPhoto(image: img,
-                                                                        fromCamera: true))])
+                                                                         fromCamera: true))])
             }
         }
         
@@ -77,9 +77,9 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             videoVC = YPVideoCaptureVC()
             videoVC?.didCaptureVideo = { [weak self] videoURL in
                 self?.didSelectItems?([YPMediaItem
-                    .video(v: YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
-                                           videoURL: videoURL,
-                                           fromCamera: true))])
+                                        .video(v: YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
+                                                               videoURL: videoURL,
+                                                               fromCamera: true))])
             }
         }
         
@@ -167,13 +167,15 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         
         // Re-trigger permission check
         if let vc = vc as? YPLibraryVC {
-            vc.checkPermission()
+            vc.doAfterLibraryPermissionCheck { [weak vc] in
+                vc?.initialize()
+            }
         } else if let cameraVC = vc as? YPCameraVC {
             cameraVC.start()
         } else if let videoVC = vc as? YPVideoCaptureVC {
             videoVC.start()
         }
-    
+
         updateUI()
     }
     
@@ -196,6 +198,10 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     
     @objc
     func navBarTapped() {
+        guard !(libraryVC?.isProcessing ?? false) else {
+            return
+        }
+        
         let vc = YPAlbumVC(albumsManager: albumsManager)
         let navVC = UINavigationController(rootViewController: vc)
         navVC.navigationBar.tintColor = .ypLabel
@@ -261,13 +267,13 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     }
     
     func updateUI() {
-		if !YPConfig.hidesCancelButton {
-			// Update Nav Bar state.
-			navigationItem.leftBarButtonItem = UIBarButtonItem(title: YPConfig.wordings.cancel,
-                                                           style: .plain,
-                                                           target: self,
-                                                           action: #selector(close))
-		}
+        if !YPConfig.hidesCancelButton {
+            // Update Nav Bar state.
+            navigationItem.leftBarButtonItem = UIBarButtonItem(title: YPConfig.wordings.cancel,
+                                                               style: .plain,
+                                                               target: self,
+                                                               action: #selector(close))
+        }
         switch mode {
         case .library:
             setTitleViewWithTitle(aTitle: libraryVC?.title ?? "")
@@ -279,7 +285,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
 
             // Disable Next Button until minNumberOfItems is reached.
             navigationItem.rightBarButtonItem?.isEnabled =
-				libraryVC!.selection.count >= YPConfig.library.minNumberOfItems
+                libraryVC!.selectedItems.count >= YPConfig.library.minNumberOfItems
 
         case .camera:
             navigationItem.titleView = nil
@@ -308,19 +314,17 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     // When pressing "Next"
     @objc
     func done() {
-        guard let libraryVC = libraryVC else { print("⚠️ YPPickerVC >>> YPLibraryVC deallocated"); return }
+        guard let libraryVC = libraryVC else { ypLog("YPLibraryVC deallocated"); return }
         
         if mode == .library {
-            libraryVC.doAfterPermissionCheck { [weak self] in
-                libraryVC.selectedMedia(photoCallback: { photo in
-                    self?.didSelectItems?([YPMediaItem.photo(p: photo)])
-                }, videoCallback: { video in
-                    self?.didSelectItems?([YPMediaItem
-                        .video(v: video)])
-                }, multipleItemsCallback: { items in
-                    self?.didSelectItems?(items)
-                })
-            }
+            libraryVC.selectedMedia(photoCallback: { photo in
+                self.didSelectItems?([YPMediaItem.photo(p: photo)])
+            }, videoCallback: { video in
+                self.didSelectItems?([YPMediaItem
+                                        .video(v: video)])
+            }, multipleItemsCallback: { items in
+                self.didSelectItems?(items)
+            })
         }
     }
     
@@ -343,7 +347,7 @@ extension YPPickerVC: YPLibraryViewDelegate {
     }
     
     public func libraryViewStartedLoadingImage() {
-		//TODO remove to enable changing selection while loading but needs cancelling previous image requests.
+        // TODO remove to enable changing selection while loading but needs cancelling previous image requests.
         libraryVC?.isProcessing = true
         DispatchQueue.main.async {
             self.libraryVC?.v.fadeInLoader()
@@ -370,13 +374,11 @@ extension YPPickerVC: YPLibraryViewDelegate {
         updateUI()
     }
     
-    public func noPhotosForOptions() {
-        self.dismiss(animated: true) {
-            self.imagePickerDelegate?.noPhotos()
-        }
+    public func libraryViewHaveNoItems() {
+        pickerVCDelegate?.libraryHasNoItems()
     }
     
     public func libraryViewShouldAddToSelection(indexPath: IndexPath, numSelections: Int) -> Bool {
-        return imagePickerDelegate?.shouldAddToSelection(indexPath: indexPath, numSelections: numSelections) ?? true
+        return pickerVCDelegate?.shouldAddToSelection(indexPath: indexPath, numSelections: numSelections) ?? true
     }
 }
