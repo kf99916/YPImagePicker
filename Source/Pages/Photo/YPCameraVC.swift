@@ -154,9 +154,9 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
             }
 
             // Flip image if taken form the front camera.
-            if let device = self.photoCapture.device, device.position == .front {
-                image = self.flipImage(image: image)
-            }
+//            if let device = self.photoCapture.device, device.position == .front {
+//                image = self.flipImage(image: image)
+//            }
             
             let noOrietationImage = image.resetOrientation()
             
