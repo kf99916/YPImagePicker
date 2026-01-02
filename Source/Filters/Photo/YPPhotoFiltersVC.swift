@@ -138,6 +138,10 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
         return smallImage!.toCIImage()!
     }
     
+    func update(collectionHeaderView: UIView?) {
+        v.collectionHeaderView = collectionHeaderView
+    }
+    
     // MARK: - Actions 🥂
 
     @objc
@@ -151,7 +155,7 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
             return ypLog("Don't have saveCallback")
         }
 		guard shouldSave?(inputPhoto, selectedFilter) ?? true else {
-            return print("Cannot be saved with the filter:", selectedFilter)
+            return ypLog("Cannot be saved with the filter: \(selectedFilter)")
         }
         
         self.navigationItem.rightBarButtonItem = YPLoaders.defaultLoader
