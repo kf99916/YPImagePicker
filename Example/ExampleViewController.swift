@@ -297,4 +297,8 @@ extension ExampleViewController: YPImagePickerDelegate {
     func shouldFilter(photo: YPMediaPhoto, filter: YPFilter?) -> Bool {
         return true
     }
+    
+    func collectionHeaderView() -> UIView? {
+        return nil
+    }
 }
