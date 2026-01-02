@@ -14,7 +14,6 @@ public protocol YPImagePickerDelegate: AnyObject {
     func imagePickerHasNoItemsInLibrary(_ picker: YPImagePicker)
     func shouldAddToSelection(indexPath: IndexPath, numSelections: Int) -> Bool
     func shouldFilter(photo: YPMediaPhoto, filter: YPFilter?) -> Bool
-    func collectionHeaderView() -> UIView?
 }
 
 open class YPImagePicker: UINavigationController {
@@ -142,7 +141,6 @@ open class YPImagePicker: UINavigationController {
                             showCropVC(photo: outputPhoto, completion: completion)
                         }
                     }
-                    filterVC.update(collectionHeaderView: self?.imagePickerDelegate?.collectionHeaderView())
                     self?.pushViewController(filterVC, animated: false)
                 } else {
                     showCropVC(photo: photo, completion: completion)

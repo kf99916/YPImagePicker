@@ -138,7 +138,7 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
         return smallImage!.toCIImage()!
     }
     
-    func update(collectionHeaderView: UIView?) {
+    open func update(collectionHeaderView: UIView?) {
         v.collectionHeaderView = collectionHeaderView
     }
     
