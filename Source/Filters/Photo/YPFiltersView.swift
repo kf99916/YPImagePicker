@@ -16,6 +16,8 @@ class YPFiltersView: UIView {
     var filtersLoader: UIActivityIndicatorView!
     fileprivate let collectionViewContainer: UIView = UIView()
     
+    var collectionHeaderView: UIView?
+    
     convenience init() {
         self.init(frame: CGRect.zero)
         collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout())
@@ -24,12 +26,13 @@ class YPFiltersView: UIView {
         filtersLoader.startAnimating()
         filtersLoader.color = YPConfig.colors.tintColor
         
+        var subviewsInCollectionViewContainer: [UIView] = [filtersLoader, collectionView]
+        if let collectionHeaderView = collectionHeaderView {
+            subviewsInCollectionViewContainer.insert(collectionHeaderView, at: 0)
+        }
         subviews(
             imageView,
-            collectionViewContainer.subviews(
-                filtersLoader,
-                collectionView
-            )
+            collectionViewContainer.subviews(subviewsInCollectionViewContainer)
         )
         
         let height = window?.windowScene?.screen.bounds.height ?? .zero
@@ -40,6 +43,10 @@ class YPFiltersView: UIView {
         |-sideMargin-collectionViewContainer-sideMargin-|
         collectionViewContainer.bottom(0)
         imageView.Bottom == collectionViewContainer.Top
+        if let collectionHeaderView = collectionHeaderView {
+            collectionHeaderView.left(16)
+            collectionHeaderView.Bottom == collectionView.Top
+        }
         |collectionView.centerVertically().height(160)|
         filtersLoader.centerInContainer()
         
