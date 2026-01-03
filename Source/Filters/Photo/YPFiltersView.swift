@@ -12,11 +12,10 @@ import Stevia
 class YPFiltersView: UIView {
     
     let imageView = UIImageView()
+    var collectionHeaderView = UIView()
     var collectionView: UICollectionView!
     var filtersLoader: UIActivityIndicatorView!
     fileprivate let collectionViewContainer: UIView = UIView()
-    
-    var collectionHeaderView: UIView?
     
     convenience init() {
         self.init(frame: CGRect.zero)
@@ -25,14 +24,10 @@ class YPFiltersView: UIView {
         filtersLoader.hidesWhenStopped = true
         filtersLoader.startAnimating()
         filtersLoader.color = YPConfig.colors.tintColor
-        
-        var subviewsInCollectionViewContainer: [UIView] = [filtersLoader, collectionView]
-        if let collectionHeaderView = collectionHeaderView {
-            subviewsInCollectionViewContainer.insert(collectionHeaderView, at: 0)
-        }
+
         subviews(
             imageView,
-            collectionViewContainer.subviews(subviewsInCollectionViewContainer)
+            collectionViewContainer.subviews(collectionHeaderView, filtersLoader, collectionView)
         )
         
         let height = window?.windowScene?.screen.bounds.height ?? .zero
@@ -43,10 +38,8 @@ class YPFiltersView: UIView {
         |-sideMargin-collectionViewContainer-sideMargin-|
         collectionViewContainer.bottom(0)
         imageView.Bottom == collectionViewContainer.Top
-        if let collectionHeaderView = collectionHeaderView {
-            collectionHeaderView.left(16)
-            collectionHeaderView.Bottom == collectionView.Top
-        }
+        collectionHeaderView.left(16)
+        collectionHeaderView.Bottom == collectionView.Top
         |collectionView.centerVertically().height(160)|
         filtersLoader.centerInContainer()
         

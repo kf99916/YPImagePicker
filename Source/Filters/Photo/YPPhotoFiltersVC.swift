@@ -138,8 +138,12 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
         return smallImage!.toCIImage()!
     }
     
-    open func update(collectionHeaderView: UIView?) {
-        v.collectionHeaderView = collectionHeaderView
+    open func update(collectionHeaderView: UIView) {
+        v.collectionHeaderView.subviews.forEach {
+            $0.removeFromSuperview()
+        }
+        v.collectionHeaderView.width(collectionHeaderView.frame.width).height(collectionHeaderView.frame.height)
+        v.collectionHeaderView.addSubview(collectionHeaderView)
     }
     
     // MARK: - Actions 🥂

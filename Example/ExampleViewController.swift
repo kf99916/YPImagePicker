@@ -299,6 +299,8 @@ extension ExampleViewController: YPImagePickerDelegate {
     }
     
     func collectionHeaderView() -> UIView? {
-        return nil
+        let view = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 30))
+        view.text = "Header"
+        return view
     }
 }

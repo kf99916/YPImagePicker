@@ -142,7 +142,9 @@ open class YPImagePicker: UINavigationController {
                             showCropVC(photo: outputPhoto, completion: completion)
                         }
                     }
-                    filterVC.update(collectionHeaderView: self?.imagePickerDelegate?.collectionHeaderView())
+                    if let collectionHeaderView = self?.imagePickerDelegate?.collectionHeaderView() {
+                        filterVC.update(collectionHeaderView: collectionHeaderView)
+                    }
                     self?.pushViewController(filterVC, animated: false)
                 } else {
                     showCropVC(photo: photo, completion: completion)
