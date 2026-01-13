@@ -38,7 +38,7 @@ class YPFiltersView: UIView {
         |-sideMargin-collectionViewContainer-sideMargin-|
         collectionViewContainer.bottom(0)
         imageView.Bottom == collectionViewContainer.Top
-        collectionHeaderView.left(16)
+        collectionHeaderView.left(60)
         collectionHeaderView.Bottom == collectionView.Top
         |collectionView.centerVertically().height(160)|
         filtersLoader.centerInContainer()
