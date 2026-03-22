@@ -38,6 +38,11 @@ internal final class YPPhotoCaptureHelper: NSObject {
 
 extension YPPhotoCaptureHelper {
     func shoot(completion: @escaping (Data) -> Void) {
+        guard session.isRunning else {
+            ypLog("YPPhotoCaptureHelper: Cannot shoot, session is not running.")
+            return
+        }
+        
         block = completion
         
         // Set current device orientation
